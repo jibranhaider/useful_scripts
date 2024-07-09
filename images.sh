@@ -1,40 +1,6 @@
 #!/bin/bash
 
 #-------------------------------------------------------------------------------
-# Print heading
-#-------------------------------------------------------------------------------
-function heading {
-    echo -e "\e[33m\n$1\e[0m"
-}
-
-#-------------------------------------------------------------------------------
-# Print success and error and warning logs
-#-------------------------------------------------------------------------------
-function success_log {
-    echo -e "\e[32m$1\e[0m"
-}
-
-function error_log {
-    echo -e "\e[41mERROR: $1\e[0m"
-}
-
-function warning_log {
-    echo -e "\e[31mWARN: $1\e[0m"
-}
-
-#-------------------------------------------------------------------------------
-# Check if previous command succeeded or not
-#-------------------------------------------------------------------------------
-function check_command {
-    if [ $? -eq 0 ]; then
-        success_log "$1 successful"
-    else
-        error_log "$1 failed"
-        exit 1
-    fi
-}
-
-#-------------------------------------------------------------------------------
 # Check arguments for case
 #-------------------------------------------------------------------------------
 check_case_arguments() {
@@ -53,15 +19,6 @@ check_case_arguments() {
         error_log "Script requires a minimum of '$num_minimum_args' arguments but '$NUM_SCRIPT_ARGS' provided"
         exit 1
     fi
-}
-
-#-------------------------------------------------------------------------------
-# Confirm action from user
-#-------------------------------------------------------------------------------
-function confirm_action {
-    action=$1
-    echo -e "$action"
-    read -p "Press 'y' to continue or any other key to abort: "
 }
 
 #-------------------------------------------------------------------------------
@@ -236,43 +193,40 @@ function script_usage_error {
 # Print script usage
 #-------------------------------------------------------------------------------
 function script_usage {
-    heading "Script usage:\n$0 [OPTIONS]"
+    subheading "Script usage: $0 [OPTIONS]"
 
     # Format of columns
     format=" %-6s %-18s %s\n"
 
-    # Get script name
-    script_name=`basename "$0"`
-
     printf "\n$format" '-c' '--combine' 'Combine multiple images vertically/horizontally to jpg/png.'
-    printf "$format" '' '' "Usage: $script_name -c <inputs> <output>"
-    printf "$format" '' '' "Example: $script_name -c *.jpg output.jpg"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -c <inputs> <output>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -c *.jpg output.jpg"
 
     printf "\n$format" '-cpdf' '--combine_to_pdf' 'Combine multiple images vertically to pdf.'
-    printf "$format" '' '' "Usage: $script_name -cpdf <inputs> <output.pdf>"
-    printf "$format" '' '' "Example: $script_name -cpdf *.jpg output"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -cpdf <inputs> <output.pdf>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -cpdf *.jpg output"
 
     printf "\n$format" '-h' '--help' 'Display script usage'
 
     printf "\n$format" '-o' '--optimise' 'Optimise and resize jpgs and pngs in-place.'
-    printf "$format" '' '' "Usage: $script_name -o <inputs> <width_in_pixels>"
-    printf "$format" '' '' "Example: $script_name -o *.jpg 1500"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -o <inputs> <width_in_pixels>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -o *.jpg 1500"
 
     printf "\n$format" '-pti' '--pdf_to_image' 'Convert multiple pdfs to image.'
-    printf "$format" '' '' "Usage: $script_name -pti <output_format> <inputs>"
-    printf "$format" '' '' "Example: $script_name -pti png *.pdf"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -pti <output_format> <inputs>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -pti png *.pdf"
 
     printf "\n$format" '-ro' '--rotate' 'Rotate multiple images in-place.'
-    printf "$format" '' '' "Usage: $script_name -ro <angle> <inputs>"
-    printf "$format" '' '' "Example: $script_name -ro 90 *.jpg"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -ro <angle> <inputs>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -ro 90 *.jpg"
 
     printf "\n$format" '-r' '--resize' 'Resize width/height of multiple images in-place.'
-    printf "$format" '' '' "Usage: $script_name -r <resize_pixels> <inputs>"
-    printf "$format" '' '' "Example: $script_name -r 500 *.jpg"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -r <resize_pixels> <inputs>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -r 500 *.jpg"
 
     printf "\n$format" '-t' '--transparent' 'Set specific color to be transparent in png.'
-    printf "$format" '' '' "Usage: $script_name -t <input> <percentage_colour_deviation> <colour> <output>"
-    printf "$format" '' '' "Example: $script_name -t input.png 35% white output.png"
+    printf "$format" '' '' "Usage: $SCRIPT_NAME -t <input> <percentage_colour_deviation> <colour> <output>"
+    printf "$format" '' '' "Example: $SCRIPT_NAME -t input.png 35% white output.png"
 
     echo
 }
@@ -282,9 +236,15 @@ function script_usage {
 #===============================================================================
 
 # Script constants
+SCRIPT_PATH=$(realpath $0)
+SCRIPT_DIR=$(dirname $SCRIPT_PATH)
+SCRIPT_NAME=$(basename "$0")
 NUM_SCRIPT_ARGS=$#
 SCRIPT_ARGS=$@
 TEMP_FILE=`mktemp`
+
+# Include definition of common functions
+source $SCRIPT_DIR/common_functions.sh
 
 # Write script usage to temporary file
 script_usage > $TEMP_FILE
